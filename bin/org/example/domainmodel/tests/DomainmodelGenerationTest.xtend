@@ -211,4 +211,87 @@ class DomainmodelGenerationTest {
             }
          ''')
     }
+    
+    @Test
+    def void loopLib() {
+        '''
+            import java.util.List
+             
+            package my.model {
+             
+                entity Person {
+                    name: String
+                    foo: Foo
+                    friends: List<Person>
+                    op fooBar(): String {
+                        return foo.getBar()
+                    }
+                    op findFriend(Person name) : Person {
+                        for (var int i = 0; i < friends.size; i++) {
+                            val friend = friends.get(i)
+                            if (friend.name.equals(name)) {
+                                return friend
+                            }
+                        }
+                        return null
+                    }
+                }
+            }
+         '''.assertCompilesTo('''
+            package my.model;
+            
+            import java.util.List;
+            import org.example.domainmodel.lib.Foo;
+            
+            @SuppressWarnings("all")
+            public class Person {
+              private String name;
+              
+              public String getName() {
+                return this.name;
+              }
+              
+              public void setName(final String name) {
+                this.name = name;
+              }
+              
+              private Foo foo;
+              
+              public Foo getFoo() {
+                return this.foo;
+              }
+              
+              public void setFoo(final Foo foo) {
+                this.foo = foo;
+              }
+              
+              private List<Person> friends;
+              
+              public List<Person> getFriends() {
+                return this.friends;
+              }
+              
+              public void setFriends(final List<Person> friends) {
+                this.friends = friends;
+              }
+              
+              public String fooBar() {
+                return this.foo.getBar();
+              }
+              
+              public Person findFriend(final Person name) {
+                for (int i = 0; (i < this.friends.size()); i++) {
+                  {
+                    final Person friend = this.friends.get(i);
+                    boolean _equals = friend.name.equals(name);
+                    if (_equals) {
+                      return friend;
+                    }
+                  }
+                }
+                return null;
+              }
+            }
+         ''')
+    }
 }
